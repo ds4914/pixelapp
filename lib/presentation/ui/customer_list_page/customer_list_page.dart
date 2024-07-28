@@ -63,7 +63,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
                     ? const Center(
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 20.0),
-                          child: Text("No Customers!!!! please add by clicking plus icon at the top"),
+                          child: Text(Strings.noResult),
                         ),
                       )
                     : ListView.builder(

@@ -158,7 +158,7 @@ class RegistrationPage extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.pleaseEnterValidEmail)));
             } else if (addressLine1Controller.text.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.addressLine1IsRequired)));
-            } else if (postCodeController.text.isEmpty) {
+            } else if (postCodeController.text.isEmpty || postCodeController.text.length < 6) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.pleaseEnterValidPostalCode)));
             } else if (stateController.text.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.stateIsRequired)));
