@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:pixelapp/common_widgets/common_search_textfield.dart';
 import 'package:pixelapp/common_widgets/exts.dart';
 import 'package:pixelapp/constants/app_colors.dart';
 import 'package:pixelapp/common_widgets/common_textfield.dart';
@@ -9,6 +10,7 @@ import 'package:pixelapp/constants/route_list.dart';
 import 'package:pixelapp/constants/strings.dart';
 import 'package:pixelapp/data/models/user_model.dart';
 import 'package:pixelapp/presentation/bloc/api_bloc.dart';
+import 'package:textfield_search/textfield_search.dart';
 
 class RegistrationPage extends StatelessWidget {
   RegistrationPage({super.key});
@@ -45,14 +47,15 @@ class RegistrationPage extends StatelessWidget {
       child: Scaffold(
         backgroundColor: AppColors.bgColor,
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             Strings.registrationScreen,
             style: TextStyle(color: AppColors.white),
           ),
-          leading:Text(""),
+          leading: const Text(""),
           backgroundColor: AppColors.appbarBgColor,
           centerTitle: true,
         ),
+        resizeToAvoidBottomInset: true,
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10.0),
           child: SingleChildScrollView(
@@ -65,6 +68,7 @@ class RegistrationPage extends StatelessWidget {
                   labelText: Strings.pan,
                   controller: panController,
                   maxLength: 10,
+                  prefixIcon: Icons.person,
                   validator: (value) {
                     if (value.toString().isValidPanCardNo()) {
                       panCardBloc.add(VerifyPanCardDetailsEvent(value.toString()));
@@ -86,6 +90,7 @@ class RegistrationPage extends StatelessWidget {
                     }
                     return CommonTextField(
                       labelText: Strings.fullName,
+                      prefixIcon: Icons.drive_file_rename_outline,
                       maxLength: 140,
                       controller: fullNameController,
                       readOnly: true,
@@ -97,6 +102,7 @@ class RegistrationPage extends StatelessWidget {
                     labelText: Strings.mobileNumber,
                     maxLength: 10,
                     prefixText: "+91 ",
+                    prefixIcon: Icons.numbers,
                     validator: (value) => value.toString().isValidMobileNumber() ? null : Strings.pleaseEnterValidMobileNumber,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     controller: mobileNumberController),
@@ -104,13 +110,15 @@ class RegistrationPage extends StatelessWidget {
                   labelText: Strings.email,
                   maxLength: 255,
                   controller: emailController,
+                  prefixIcon: Icons.email,
                   validator: (value) => value.toString().isEmailValid() ? null : Strings.pleaseEnterValidEmail,
                 ),
-                CommonTextField(labelText: Strings.addressLine1, controller: addressLine1Controller),
-                CommonTextField(labelText: Strings.addressLine2, controller: addressLine2Controller),
+                CommonTextField(labelText: Strings.addressLine1, controller: addressLine1Controller,prefixIcon: Icons.location_city,),
+                CommonTextField(labelText: Strings.addressLine2, controller: addressLine2Controller,prefixIcon: Icons.cell_tower,),
                 CommonTextField(
                     labelText: Strings.postCode,
                     maxLength: 6,
+                    prefixIcon: Icons.post_add_outlined,
                     suffix: BlocBuilder<ApiBloc, ApiState>(
                       bloc: postalCodeBloc,
                       builder: (context, state) {
@@ -128,19 +136,29 @@ class RegistrationPage extends StatelessWidget {
                 BlocBuilder<ApiBloc, ApiState>(
                   bloc: postalCodeBloc,
                   builder: (context, state) {
-                    if (state is PostalCodeDetailsLoadedState) {
+                    if(state is PostalCodeDetailsLoadedState){
                       stateController.text = state.responseModel.state!.first.name.toString();
                     }
-                    return CommonTextField(labelText: Strings.state, controller: stateController);
+                    return CommonSearchTextField(
+                      controller: stateController,
+                      prefixIcon: Icons.location_city_outlined,
+                      initialList: (state is PostalCodeDetailsLoadedState) ? state.state : [],
+                      labelText: Strings.state,
+                    );
                   },
                 ),
                 BlocBuilder<ApiBloc, ApiState>(
                   bloc: postalCodeBloc,
                   builder: (context, state) {
-                    if (state is PostalCodeDetailsLoadedState) {
+                    if(state is PostalCodeDetailsLoadedState){
                       cityController.text = state.responseModel.city!.first.name.toString();
                     }
-                    return CommonTextField(labelText: Strings.city, controller: cityController);
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 50),
+                      child: CommonSearchTextField(
+                        prefixIcon: Icons.location_city,
+                          labelText: Strings.city, controller: cityController, initialList: (state is PostalCodeDetailsLoadedState) ? state.city : []),
+                    );
                   },
                 ),
                 const SizedBox(height: 10),
@@ -150,11 +168,11 @@ class RegistrationPage extends StatelessWidget {
         ),
         bottomNavigationBar: GestureDetector(
           onTap: () {
-            if (panController.text.isEmpty) {
+            if (panController.text.isEmpty || !panController.text.toString().isValidPanCardNo()) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.pleaseEnterValidPanNumber)));
-            } else if (mobileNumberController.text.isEmpty) {
+            } else if (mobileNumberController.text.isEmpty || mobileNumberController.text.length<10) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.pleaseEnterValidMobileNumber)));
-            } else if (emailController.text.isEmpty) {
+            } else if (emailController.text.isEmpty || !emailController.text.isEmailValid()) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.pleaseEnterValidEmail)));
             } else if (addressLine1Controller.text.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.addressLine1IsRequired)));
@@ -165,12 +183,8 @@ class RegistrationPage extends StatelessWidget {
             } else if (cityController.text.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.cityIsRequired)));
             } else {
-              List<dynamic> customerList = [];
-              customerList = GetStorage().read(Strings.dbKey)?? [];
-              if(customerList.isNotEmpty && customerList.any((element) =>element.panNumber == panController.text)){
-                customerList.removeWhere((element) => element.panNumber == panController.text);
-              }
-              customerList.add(UserModel(
+
+              UserModel userModel =  UserModel(
                   panNumber: panController.text,
                   fullName: fullNameController.text,
                   mobileNumber: mobileNumberController.text,
@@ -179,10 +193,8 @@ class RegistrationPage extends StatelessWidget {
                   addressLine2: addressLine2Controller.text,
                   postcode: postCodeController.text,
                   state: stateController.text,
-                  city: cityController.text));
-              GetStorage().write(Strings.dbKey, customerList).then((value) {
-                Navigator.pushNamed(context, RouteList.customerListPage);
-              });
+                  city: cityController.text);
+                Navigator.pushNamed(context, RouteList.customerListPage,arguments: userModel);
             }
           },
           child: Container(

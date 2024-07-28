@@ -25,6 +25,12 @@ class _CustomerListPageState extends State<CustomerListPage> {
   @override
   Widget build(BuildContext context) {
     print(customerList.length);
+    UserModel args = ModalRoute.of(context)!.settings.arguments as UserModel;
+    if (customerList.isNotEmpty && customerList.any((element) => element.panNumber == args.panNumber)) {
+      customerList.removeWhere((element) => element.panNumber == args.panNumber);
+    }
+    customerList.add(args);
+    GetStorage().write(Strings.dbKey, customerList);
     return PopScope(
       canPop: false,
       child: Scaffold(

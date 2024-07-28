@@ -26,7 +26,15 @@ class ApiBloc extends Bloc<ApiEvent, ApiState> {
       emit(PostalCodeDetailsLoadingState());
       var data = await PostalCodeDetailsUseCase(ApiRepositoryImpl(ApiRemoteDataSourceImpl(Client()))).call(PostalCodeDetailsRequestModel(postcode: event.postalCode));
       print(data.city!.first.name);
-      emit(PostalCodeDetailsLoadedState(responseModel: data));
+      List<String> cityList = [];
+      for(int i = 0;i<data.city!.length;i++){
+        cityList.add(data.city![i].name.toString());
+      }
+      List<String> stateList = [];
+      for(int i = 0;i<data.city!.length;i++){
+        stateList.add(data.state![i].name.toString());
+      }
+      emit(PostalCodeDetailsLoadedState(responseModel: data,city: cityList,state: stateList));
     });
   }
 }

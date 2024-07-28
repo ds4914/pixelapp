@@ -18,6 +18,8 @@ class PostalCodeDetailsLoadingState extends ApiState{}
 
 class PostalCodeDetailsLoadedState extends ApiState{
   final PostalCodeDetailsResponseModel responseModel;
-  PostalCodeDetailsLoadedState({required this.responseModel});
+  final List<String>? city;
+  final List<String>? state;
+  PostalCodeDetailsLoadedState({required this.responseModel,required this.state,required this.city});
 }
 

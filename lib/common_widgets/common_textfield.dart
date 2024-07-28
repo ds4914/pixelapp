@@ -10,6 +10,7 @@ class CommonTextField extends StatelessWidget {
   void Function(String)? onChanged;
   String? Function(String?)? validator;
   final bool? readOnly;
+  final IconData? prefixIcon;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final String? prefixText;
@@ -17,7 +18,7 @@ class CommonTextField extends StatelessWidget {
   CommonTextField(
       {super.key,
       this.onChanged,
-      this.readOnly,
+  required this.prefixIcon,    this.readOnly,
       this.validator,
       this.keyboardType,
       this.inputFormatters,
@@ -44,8 +45,8 @@ class CommonTextField extends StatelessWidget {
           focusColor: Colors.white,
           prefixText: prefixText,
           counterText: '',
-          prefixIcon: const Icon(
-            Icons.person_outline_rounded,
+          prefixIcon:  Icon(
+            prefixIcon,
             color: Colors.blueGrey,
           ),
           border: OutlineInputBorder(
