@@ -33,7 +33,7 @@ class CustomerCard extends StatelessWidget {
                     ),
                     Expanded(
                       child: Text(
-                        customer.fullName,
+                        customer['fullName'],
                         style: const TextStyle(color: AppColors.grey),
                       ),
                     )
@@ -80,7 +80,7 @@ class CustomerCard extends StatelessWidget {
               const Text('${Strings.pan}: '),
               Expanded(
                 child: Text(
-                  customer.panNumber,
+                  customer['panNumber'],
                   style: const TextStyle(color: AppColors.grey),
                 ),
               )
@@ -92,7 +92,7 @@ class CustomerCard extends StatelessWidget {
               const Text('${Strings.mobileNumber}: '),
               Expanded(
                 child: Text(
-                  customer.mobileNumber,
+                  customer['mobileNumber'],
                   style: const TextStyle(color: AppColors.grey),
                 ),
               )
@@ -104,7 +104,7 @@ class CustomerCard extends StatelessWidget {
               const Text('${Strings.email}: '),
               Expanded(
                 child: Text(
-                  customer.email,
+                  customer['email'],
                   style: const TextStyle(color: AppColors.grey),
                 ),
               )
@@ -116,7 +116,7 @@ class CustomerCard extends StatelessWidget {
               const Text('${Strings.addressLine1}: '),
               Expanded(
                 child: Text(
-                  customer.addressLine1,
+                  customer['addressLine1'],
                   style: const TextStyle(color: AppColors.grey),
                 ),
               )
@@ -128,7 +128,7 @@ class CustomerCard extends StatelessWidget {
               const Text('${Strings.addressLine2}: '),
               Expanded(
                 child: Text(
-                  customer.addressLine2,
+                  customer['addressLine2'],
                   style: const TextStyle(color: AppColors.grey),
                 ),
               )
@@ -139,7 +139,7 @@ class CustomerCard extends StatelessWidget {
             children: [
               const Text('${Strings.postCode}: '),
               Text(
-                customer.postcode,
+                customer['postcode'],
                 style: const TextStyle(color: AppColors.grey),
               )
             ],
@@ -150,7 +150,7 @@ class CustomerCard extends StatelessWidget {
               const Text('${Strings.state}: '),
               Expanded(
                 child: Text(
-                  customer.state,
+                  customer['state'],
                   style: const TextStyle(color: AppColors.grey),
                 ),
               )
@@ -161,7 +161,7 @@ class CustomerCard extends StatelessWidget {
             children: [
               const Text('${Strings.city}: '),
               Text(
-                customer.city,
+                customer['city'],
                 style: const TextStyle(color: AppColors.grey),
               )
             ],
@@ -171,3 +171,4 @@ class CustomerCard extends StatelessWidget {
     ));
   }
 }
+
