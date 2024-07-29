@@ -25,12 +25,6 @@ class _CustomerListPageState extends State<CustomerListPage> {
   @override
   Widget build(BuildContext context) {
     print(customerList.length);
-    UserModel args = ModalRoute.of(context)!.settings.arguments as UserModel;
-    if (customerList.isNotEmpty && customerList.any((element) => element.panNumber == args.panNumber)) {
-      customerList.removeWhere((element) => element.panNumber == args.panNumber);
-    }
-    customerList.add(args);
-    GetStorage().write(Strings.dbKey, customerList);
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -41,7 +35,8 @@ class _CustomerListPageState extends State<CustomerListPage> {
             style: TextStyle(color: AppColors.white),
           ),
           centerTitle: true,
-          backgroundColor: AppColors.appbarBgColor,leading: const Text(""),
+          backgroundColor: AppColors.appbarBgColor,
+          leading: const Text(""),
           actions: [
             GestureDetector(
               onTap: () {
@@ -51,7 +46,8 @@ class _CustomerListPageState extends State<CustomerListPage> {
                 height: 28,
                 width: 28,
                 margin: const EdgeInsets.all(10),
-                decoration: BoxDecoration(border: Border.all(color: AppColors.white), borderRadius: const BorderRadius.all(Radius.circular(8))),
+                decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.white), borderRadius: const BorderRadius.all(Radius.circular(8))),
                 child: const Icon(
                   Icons.add,
                   color: AppColors.white,
