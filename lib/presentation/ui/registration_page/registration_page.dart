@@ -10,7 +10,6 @@ import 'package:pixelapp/constants/route_list.dart';
 import 'package:pixelapp/constants/strings.dart';
 import 'package:pixelapp/data/models/user_model.dart';
 import 'package:pixelapp/presentation/bloc/api_bloc.dart';
-import 'package:textfield_search/textfield_search.dart';
 
 class RegistrationPage extends StatelessWidget {
   RegistrationPage({super.key});
@@ -31,19 +30,23 @@ class RegistrationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (ModalRoute.of(context)!.settings.arguments != null) {
-      UserModel args = ModalRoute.of(context)!.settings.arguments as UserModel;
-      panController.text = args.panNumber;
-      fullNameController.text = args.fullName;
-      mobileNumberController.text = args.mobileNumber;
-      emailController.text = args.email;
-      addressLine1Controller.text = args.addressLine1;
-      addressLine2Controller.text = args.addressLine2;
-      postCodeController.text = args.postcode;
-      stateController.text = args.state;
-      cityController.text = args.city;
+      dynamic args = ModalRoute.of(context)!.settings.arguments as dynamic;
+      panController.text = args['panNumber'];
+      fullNameController.text = args['fullName'];
+      mobileNumberController.text = args['mobileNumber'];
+      emailController.text = args['email'];
+      addressLine1Controller.text = args['addressLine1'];
+      addressLine2Controller.text = args['addressLine2'];
+      postCodeController.text = args['postcode'];
+      stateController.text = args['state'];
+      cityController.text = args['city'];
     }
     return PopScope(
-      canPop: false,
+      onPopInvoked: (val) {
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+      },
       child: Scaffold(
         backgroundColor: AppColors.bgColor,
         appBar: AppBar(
@@ -113,8 +116,16 @@ class RegistrationPage extends StatelessWidget {
                   prefixIcon: Icons.email,
                   validator: (value) => value.toString().isEmailValid() ? null : Strings.pleaseEnterValidEmail,
                 ),
-                CommonTextField(labelText: Strings.addressLine1, controller: addressLine1Controller,prefixIcon: Icons.location_city,),
-                CommonTextField(labelText: Strings.addressLine2, controller: addressLine2Controller,prefixIcon: Icons.cell_tower,),
+                CommonTextField(
+                  labelText: Strings.addressLine1,
+                  controller: addressLine1Controller,
+                  prefixIcon: Icons.location_city,
+                ),
+                CommonTextField(
+                  labelText: Strings.addressLine2,
+                  controller: addressLine2Controller,
+                  prefixIcon: Icons.cell_tower,
+                ),
                 CommonTextField(
                     labelText: Strings.postCode,
                     maxLength: 6,
@@ -136,7 +147,7 @@ class RegistrationPage extends StatelessWidget {
                 BlocBuilder<ApiBloc, ApiState>(
                   bloc: postalCodeBloc,
                   builder: (context, state) {
-                    if(state is PostalCodeDetailsLoadedState){
+                    if (state is PostalCodeDetailsLoadedState) {
                       stateController.text = state.responseModel.state!.first.name.toString();
                     }
                     return CommonSearchTextField(
@@ -150,14 +161,16 @@ class RegistrationPage extends StatelessWidget {
                 BlocBuilder<ApiBloc, ApiState>(
                   bloc: postalCodeBloc,
                   builder: (context, state) {
-                    if(state is PostalCodeDetailsLoadedState){
+                    if (state is PostalCodeDetailsLoadedState) {
                       cityController.text = state.responseModel.city!.first.name.toString();
                     }
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 50),
                       child: CommonSearchTextField(
-                        prefixIcon: Icons.location_city,
-                          labelText: Strings.city, controller: cityController, initialList: (state is PostalCodeDetailsLoadedState) ? state.city : []),
+                          prefixIcon: Icons.location_city,
+                          labelText: Strings.city,
+                          controller: cityController,
+                          initialList: (state is PostalCodeDetailsLoadedState) ? state.city : []),
                     );
                   },
                 ),
@@ -170,7 +183,7 @@ class RegistrationPage extends StatelessWidget {
           onTap: () {
             if (panController.text.isEmpty || !panController.text.toString().isValidPanCardNo()) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.pleaseEnterValidPanNumber)));
-            } else if (mobileNumberController.text.isEmpty || mobileNumberController.text.length<10) {
+            } else if (mobileNumberController.text.isEmpty || mobileNumberController.text.length < 10) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.pleaseEnterValidMobileNumber)));
             } else if (emailController.text.isEmpty || !emailController.text.isEmailValid()) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.pleaseEnterValidEmail)));
@@ -183,18 +196,32 @@ class RegistrationPage extends StatelessWidget {
             } else if (cityController.text.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(Strings.cityIsRequired)));
             } else {
+              List<UserModel> customerList = (GetStorage().read(Strings.dbKey) as List?)
+                      ?.map((e) => UserModel.fromJson(e as Map<String, dynamic>))
+                      .toList() ??
+                  [];
+              //This Logic is for editing the customer if it already exists
+              if (customerList.isNotEmpty && customerList.any((element) => element.panNumber == panController.text)) {
+                customerList.removeWhere((element) => element.panNumber == panController.text);
+              }
+              customerList.add(UserModel(
+                panNumber: panController.text,
+                fullName: fullNameController.text,
+                mobileNumber: mobileNumberController.text,
+                email: emailController.text,
+                addressLine1: addressLine1Controller.text,
+                addressLine2: addressLine2Controller.text,
+                postcode: postCodeController.text,
+                state: stateController.text,
+                city: cityController.text,
+              ));
 
-              UserModel userModel =  UserModel(
-                  panNumber: panController.text,
-                  fullName: fullNameController.text,
-                  mobileNumber: mobileNumberController.text,
-                  email: emailController.text,
-                  addressLine1: addressLine1Controller.text,
-                  addressLine2: addressLine2Controller.text,
-                  postcode: postCodeController.text,
-                  state: stateController.text,
-                  city: cityController.text);
-                Navigator.pushNamed(context, RouteList.customerListPage,arguments: userModel);
+              GetStorage().write(Strings.dbKey, customerList.map((e) => e.toJson()).toList());
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                RouteList.customerListPage,
+                (Route<dynamic> route) => false, // This will remove all routes below the target route
+              );
             }
           },
           child: Container(
@@ -204,7 +231,7 @@ class RegistrationPage extends StatelessWidget {
             decoration: const BoxDecoration(color: AppColors.appbarBgColor, borderRadius: BorderRadius.all(Radius.circular(15))),
             child: const Center(
                 child: Text(
-              'Register',
+              Strings.register,
               style: TextStyle(color: AppColors.white),
             )),
           ),
