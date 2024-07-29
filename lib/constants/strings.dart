@@ -21,4 +21,5 @@ class Strings{
   static const String stateIsRequired = "State is required*";
   static const String cityIsRequired = "City is required*";
   static const String noResult = "No Customers!!!! please add by clicking plus icon at the top";
+  static const String register = "Register";
 }
