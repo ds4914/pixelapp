@@ -1,6 +1,6 @@
 # pixelapp
 
-A new Flutter project.
+Registration form for customers.
 
 ## Getting Started
 
